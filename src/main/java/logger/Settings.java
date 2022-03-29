@@ -1,39 +1,74 @@
 package logger;
 
-import netscape.javascript.JSObject;
+import com.sun.source.tree.Tree;
 import org.json.JSONObject;
+
+import java.util.*;
 
 public class Settings {
     private static JSONObject jo;
     private static final String settingsFileName = "client_settings.json";
     private static final FileHandler fh = new FileHandler();
 
+    private final Set<String> jsonKeys = new HashSet<>();
+
+    private final String jsonModelKeyNick = "nick";
+    private final String jsonModelKeyServerIp = "server_ip";
+    private final String jsonModelKeyServerPort = "server_port";
+
     public Settings() {
+        jsonKeys.add(jsonModelKeyNick);
+        jsonKeys.add(jsonModelKeyServerIp);
+        jsonKeys.add(jsonModelKeyServerPort);
         jo = readSettings();
     }
 
+    public Set<String> getJsonKeys() {
+        return jsonKeys;
+    }
+
     public String getNick() {
-        return readSettings().get("nick").toString();
+        return readSettings().get(jsonModelKeyNick).toString();
     }
 
     public void setNick(String s) {
-        addSettings("nick", s);
+        addSettings(jsonModelKeyNick, s);
     }
 
-    private JSONObject getJsonMaket() {
+    public String getServerPort() {
+        return readSettings().get(jsonModelKeyServerPort).toString();
+    }
+
+    public void setServerPort(int port) {
+        addSettings(jsonModelKeyServerPort, port);
+    }
+
+    public String getServerIp() {
+        return readSettings().get(jsonModelKeyServerIp).toString();
+    }
+
+    public void setServerIp(String ip) {
+        addSettings(jsonModelKeyServerIp, ip);
+    }
+
+    public boolean isEmptySettingByKey(String key) {
+        return jo.get(key).toString().equals("");
+    }
+
+    private JSONObject getJsonModel() {
         JSONObject jo = new JSONObject();
-        jo.put("nick", "");
-        jo.put("server_ip", "");
-        jo.put("server_port", "");
+        for (String key : jsonKeys) {
+            jo.put(key, "");
+        }
         return jo;
     }
 
     private JSONObject readSettings() {
         String json = fh.getString(settingsFileName);
         if (json == null || json.equals("")) {
-            String jsonMaket = getJsonMaket().toString();
-            fh.replaceData(settingsFileName, jsonMaket);
-            return new JSONObject(jsonMaket);
+            String jsonModel = getJsonModel().toString();
+            fh.replaceData(settingsFileName, jsonModel);
+            return new JSONObject(jsonModel);
         } else {
             return new JSONObject(json);
         }
@@ -43,10 +78,13 @@ public class Settings {
         fh.replaceData(settingsFileName, jo.toString());
     }
 
-    private void addSettings(String k, String v) {
-        //JSONObject jo = readSettings(settingsFileName);
-        //Logger.getInstance().log(jo.toString());
+    private <T> void addSettings(String k, T v) {
         jo.put(k, v);
+        writeSettings();
+    }
+
+    public void defaultSettings() {
+        jo = getJsonModel();
         writeSettings();
     }
 }

@@ -21,6 +21,7 @@ public class Main {
             } else {
                 System.out.println("1. Изменить ник");
             }
+
             int chooseMenuId = Integer.parseInt(scanner.nextLine());
             if (chooseMenuId == 0) break;
             switch (chooseMenuId) {
