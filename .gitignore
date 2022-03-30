@@ -1,4 +1,5 @@
 *.txt
+client_settings.json
 .gradle
 .idea
 /build

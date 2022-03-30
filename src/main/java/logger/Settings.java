@@ -12,14 +12,14 @@ public class Settings {
 
     private final Set<String> jsonKeys = new HashSet<>();
 
-    private final String jsonModelKeyNick = "nick";
-    private final String jsonModelKeyServerIp = "server_ip";
-    private final String jsonModelKeyServerPort = "server_port";
+    public final String JSON_MODEL_KEY_NICK = "nick";
+    public final String JSON_MODEL_KEY_SERVER_IP = "server_ip";
+    public final String JSON_MODEL_KEY_SERVER_PORT = "server_port";
 
     public Settings() {
-        jsonKeys.add(jsonModelKeyNick);
-        jsonKeys.add(jsonModelKeyServerIp);
-        jsonKeys.add(jsonModelKeyServerPort);
+        jsonKeys.add(JSON_MODEL_KEY_NICK);
+        jsonKeys.add(JSON_MODEL_KEY_SERVER_IP);
+        jsonKeys.add(JSON_MODEL_KEY_SERVER_PORT);
         jo = readSettings();
     }
 
@@ -28,27 +28,27 @@ public class Settings {
     }
 
     public String getNick() {
-        return readSettings().get(jsonModelKeyNick).toString();
+        return readSettings().get(JSON_MODEL_KEY_NICK).toString();
     }
 
     public void setNick(String s) {
-        addSettings(jsonModelKeyNick, s);
+        addSettings(JSON_MODEL_KEY_NICK, s);
     }
 
-    public String getServerPort() {
-        return readSettings().get(jsonModelKeyServerPort).toString();
+    public int getServerPort() {
+        return Integer.parseInt(readSettings().get(JSON_MODEL_KEY_SERVER_PORT).toString());
     }
 
     public void setServerPort(int port) {
-        addSettings(jsonModelKeyServerPort, port);
+        addSettings(JSON_MODEL_KEY_SERVER_PORT, port);
     }
 
     public String getServerIp() {
-        return readSettings().get(jsonModelKeyServerIp).toString();
+        return readSettings().get(JSON_MODEL_KEY_SERVER_IP).toString();
     }
 
     public void setServerIp(String ip) {
-        addSettings(jsonModelKeyServerIp, ip);
+        addSettings(JSON_MODEL_KEY_SERVER_IP, ip);
     }
 
     public boolean isEmptySettingByKey(String key) {

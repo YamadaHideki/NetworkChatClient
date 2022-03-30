@@ -1,21 +1,28 @@
+import logger.ClientLogger;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
-import java.util.Scanner;
 
 public class Client {
-    public static void main(String[] args) throws IOException {
+    public static void main(String serverIp, int serverPort) throws IOException {
         // Определяем сокет сервера
-        InetSocketAddress socketAddress = new InetSocketAddress("127.0.0.1", 8081);
+        InetSocketAddress socketAddress = new InetSocketAddress(serverIp, serverPort);
         final SocketChannel socketChannel = SocketChannel.open();
 
         //  подключаемся к серверу
-        socketChannel.connect(socketAddress);
+        try {
+            socketChannel.connect(socketAddress);
+            ClientLogger.log("Соединение с сервером установлено");
+        } catch (IOException e) {
+            ClientLogger.log("Не удалось соединиться с сервером");
+        }
+
 
         // Получаем входящий и исходящий потоки информации
-        try (Scanner scanner = new Scanner(System.in)) {
+        try {
 
             //  Определяем буфер для получения данных
             //final ByteBuffer inputBuffer = ByteBuffer.allocate(2 << 10);
@@ -23,8 +30,8 @@ public class Client {
             String msg;
             while (true) {
                 System.out.println("Введите число n для последовательности чисел Фибоначчи...");
-                msg = scanner.nextLine().trim() + "\r\n";
-                if (msg.trim().equals("end")) break;
+                msg = Main.scanner.nextLine().trim() + "\r\n";
+                if (msg.trim().equals("/exit")) break;
 
                 socketChannel.write(
                         ByteBuffer.wrap(
@@ -36,6 +43,7 @@ public class Client {
             }
         } finally {
             socketChannel.close();
+            ClientLogger.log("Соединение с сервером закрыто");
         }
 
     }

@@ -32,6 +32,6 @@ public class TestSettings {
 
         int serverPort = 8081;
         settings.setServerPort(serverPort);
-        Assertions.assertEquals(settings.getServerPort(), String.valueOf(serverPort));
+        Assertions.assertEquals(settings.getServerPort(), serverPort);
     }
 }
