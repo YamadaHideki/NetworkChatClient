@@ -28,7 +28,7 @@ public class Main {
             !settings.isEmptySettingByKey(settings.JSON_MODEL_KEY_SERVER_IP) ||
             !settings.isEmptySettingByKey(settings.JSON_MODEL_KEY_SERVER_PORT)) {
             try {
-                Client.main(settings.getServerIp(), settings.getServerPort());
+                Client.main(settings);
             } catch (IOException e) {
                 e.getMessage();
             }
