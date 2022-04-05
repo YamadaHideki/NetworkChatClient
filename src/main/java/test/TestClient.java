@@ -1,3 +1,5 @@
+package test;
+
 import logger.ClientLogger;
 import logger.Settings;
 import org.json.JSONObject;
@@ -10,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 
 public class TestClient {
 
-    public static void main(Settings settings, String message) throws IOException {
+    public void main(Settings settings, String message) throws IOException {
         // Определяем сокет сервера
         InetSocketAddress socketAddress = new InetSocketAddress(settings.getServerIp(), settings.getServerPort());
         final SocketChannel socketChannel = SocketChannel.open();
@@ -32,17 +34,13 @@ public class TestClient {
 
         // Получаем входящий и исходящий потоки информации
         try {
-
+            System.out.println(1);
             //  Определяем буфер для получения данных
             //final ByteBuffer inputBuffer = ByteBuffer.allocate(2 << 10);
 
             String msg;
             for (int i = 0; i < 20; i++) {
-                Thread.sleep((int) (Math.random() * 3000 + 500));
-                System.out.println("Введите число n для последовательности чисел Фибоначчи...");
-                msg = message;
-
-                msg = new JSONObject().put("nick", settings.getNick()).put("message", msg).toString() + "\n";
+                msg = new JSONObject().put("nick", settings.getNick()).put("message", message).toString() + "\n";
 
                 socketChannel.write(
                         ByteBuffer.wrap(
@@ -51,10 +49,13 @@ public class TestClient {
                 /*int bytesCount = socketChannel.read(inputBuffer);
                 System.out.println(new String(inputBuffer.array(), 0, bytesCount, StandardCharsets.UTF_8).trim());
                 inputBuffer.clear();*/
+                Thread.sleep((int) (Math.random() * 1500) + 200);
             }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            System.out.println(2);
+            System.out.println(e.getMessage());
         } finally {
+            System.out.println(3);
             socketChannel.close();
             //ClientLogger.log("Соединение с сервером закрыто");
         }

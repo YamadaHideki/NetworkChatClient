@@ -7,8 +7,12 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Client {
+    private static final ExecutorService pool = Executors.newFixedThreadPool(2);
+    private static final Thread inputThread = new Thread();
 
     public static void main(Settings settings) throws IOException {
         // Определяем сокет сервера
@@ -33,12 +37,23 @@ public class Client {
         // Получаем входящий и исходящий потоки информации
         try {
 
-            //  Определяем буфер для получения данных
-            //final ByteBuffer inputBuffer = ByteBuffer.allocate(2 << 10);
+            pool.submit(() -> {
+                //  Определяем буфер для получения данных
+                final ByteBuffer inputBuffer = ByteBuffer.allocate(2 << 10);
+                while (socketChannel.isConnected()) {
+                    int bytesCount = 0;
+                    try {
+                        bytesCount = socketChannel.read(inputBuffer);
+                        System.out.println(new String(inputBuffer.array(), 0, bytesCount, StandardCharsets.UTF_8).trim());
+                        inputBuffer.clear();
+                    } catch (IOException ignored) { }
+                }
+            });
+
+
 
             String msg;
             while (true) {
-                System.out.println("Введите число n для последовательности чисел Фибоначчи...");
                 msg = Main.scanner.nextLine().trim();
                 if (msg.trim().equals("/exit")) break;
 

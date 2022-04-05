@@ -1,3 +1,5 @@
+package test;
+
 import logger.Settings;
 import org.json.JSONObject;
 
