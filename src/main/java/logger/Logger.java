@@ -7,7 +7,7 @@ import java.util.concurrent.Executors;
 
 public class Logger {
     private static Logger instance = null;
-    private final FileHandler fileHandler = new FileHandler();
+    private final FileHandler fileHandler = FileHandler.getInstance();
     private final ExecutorService pool = Executors.newSingleThreadExecutor();
     protected int num = 1;
     protected final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd.MM.yyyy hh:mm:ss");

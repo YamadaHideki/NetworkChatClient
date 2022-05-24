@@ -28,11 +28,11 @@ public class Main {
             !settings.isEmptySettingByKey(settings.JSON_MODEL_KEY_SERVER_IP) ||
             !settings.isEmptySettingByKey(settings.JSON_MODEL_KEY_SERVER_PORT)) {
             try {
+                spaceInConsole();
                 Client.main(settings);
             } catch (IOException e) {
                 e.getMessage();
             }
-
         }
     }
 
@@ -45,9 +45,7 @@ public class Main {
             String in = scanner.nextLine();
             switch (in) {
                 case "/start":
-                    spaceInConsole();
                     client_UI();
-                    spaceInConsole();
                     break;
                 case "/settings":
                     spaceInConsole();
@@ -104,7 +102,7 @@ public class Main {
                     settings.setServerIp(serverIp);
                     break;
                 case 3:
-                    System.out.println("Введите Server IP");
+                    System.out.println("Введите Server PORT");
                     String serverPort = scanner.nextLine();
                     settings.setServerPort(Integer.parseInt(serverPort));
                     break;

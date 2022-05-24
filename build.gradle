@@ -14,12 +14,8 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     // https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine
     testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
-    /*// https://mvnrepository.com/artifact/com.google.code.gson/gson
-    implementation 'com.google.code.gson:gson:2.9.0'*/
     // https://mvnrepository.com/artifact/org.json/json
     implementation 'org.json:json:20220320'
-    // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
-    //implementation 'org.apache.commons:commons-lang3:3.12.0'
 
 }
 

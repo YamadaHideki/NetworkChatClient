@@ -1,6 +1,5 @@
 package logger;
 
-import com.sun.source.tree.Tree;
 import org.json.JSONObject;
 
 import java.util.*;
@@ -8,7 +7,7 @@ import java.util.*;
 public class Settings {
     private static JSONObject jo;
     private static final String settingsFileName = "client_settings.json";
-    private static final FileHandler fh = new FileHandler();
+    private static final FileHandler fh = FileHandler.getInstance();
 
     private final Set<String> jsonKeys = new HashSet<>();
 

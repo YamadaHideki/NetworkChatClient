@@ -1,4 +1,4 @@
-package test;
+package multiplyConnect;
 
 import logger.Settings;
 import org.json.JSONObject;

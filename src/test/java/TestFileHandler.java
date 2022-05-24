@@ -4,7 +4,7 @@ import org.junit.jupiter.api.*;
 import java.io.*;
 
 public class TestFileHandler {
-    private final FileHandler fileHandler = new FileHandler();
+    private final FileHandler fileHandler = FileHandler.getInstance();
     private final String fileName = "test.txt";
     private final File f = new File(fileName);
 

@@ -1,20 +1,24 @@
 import logger.ClientLogger;
+import logger.FileHandler;
+import logger.MessageLogger;
 import logger.Settings;
 import org.json.JSONObject;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Client {
-    private static final ExecutorService pool = Executors.newFixedThreadPool(2);
     private static final Thread inputThread = new Thread();
 
     public static void main(Settings settings) throws IOException {
+        ExecutorService pool = Executors.newFixedThreadPool(2);
         // Определяем сокет сервера
         InetSocketAddress socketAddress = new InetSocketAddress(settings.getServerIp(), settings.getServerPort());
         final SocketChannel socketChannel = SocketChannel.open();
@@ -28,15 +32,48 @@ public class Client {
             socketChannel.write(
                     ByteBuffer.wrap(
                             (jo.toString() + "\n").getBytes(StandardCharsets.UTF_8)));
+
+            /* Получаем размер файла лога, для создания буфера */
+            var byteBufferSizeFile = ByteBuffer.allocate(Long.BYTES);
+            socketChannel.read(byteBufferSizeFile);
+            byteBufferSizeFile.flip();
+
+            /* Получаем файл лога message_log.txt */
+            var inputBuffer = ByteBuffer.allocate((int) byteBufferSizeFile.getLong());
+            socketChannel.read(inputBuffer);
+
+            byte[] inputBufferArray = inputBuffer.array();
+
+            File messageLogFile = FileHandler.getInstance().readFile(MessageLogger.getLogFileName());
+            try {
+                var fis = new FileInputStream(messageLogFile);
+
+                /* Если логи отличаются от загруженных с сервера, заменяем на новый */
+                if (!FileHandler.getInstance().compareFiles(inputBufferArray, fis.readAllBytes())) {
+                    FileWriter fw = new FileWriter(messageLogFile);
+                    fw.flush();
+                    fw.close();
+                    Files.write(Path.of(messageLogFile.toURI()), inputBufferArray);
+                }
+
+                BufferedReader fr = new BufferedReader(new FileReader(messageLogFile));
+                while (fr.ready()) {
+                    var line = fr.readLine().substring(22);
+                    System.out.println(line);
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
             ClientLogger.log("Соединение с сервером установлено");
         } catch (IOException e) {
             ClientLogger.log("Не удалось соединиться с сервером");
+            socketChannel.close();
+            return;
         }
 
 
         // Получаем входящий и исходящий потоки информации
         try {
-
             pool.submit(() -> {
                 //  Определяем буфер для получения данных
                 final ByteBuffer inputBuffer = ByteBuffer.allocate(2 << 10);
@@ -44,7 +81,9 @@ public class Client {
                     int bytesCount = 0;
                     try {
                         bytesCount = socketChannel.read(inputBuffer);
-                        System.out.println(new String(inputBuffer.array(), 0, bytesCount, StandardCharsets.UTF_8).trim());
+                        String messageFromServer = new String(inputBuffer.array(), 0, bytesCount, StandardCharsets.UTF_8).trim();
+                        MessageLogger.log(messageFromServer);
+                        System.out.println(messageFromServer);
                         inputBuffer.clear();
                     } catch (IOException ignored) { }
                 }
@@ -62,15 +101,11 @@ public class Client {
                 socketChannel.write(
                         ByteBuffer.wrap(
                                 msg.getBytes(StandardCharsets.UTF_8)));
-
-                /*int bytesCount = socketChannel.read(inputBuffer);
-                System.out.println(new String(inputBuffer.array(), 0, bytesCount, StandardCharsets.UTF_8).trim());
-                inputBuffer.clear();*/
             }
         } finally {
             socketChannel.close();
             ClientLogger.log("Соединение с сервером закрыто");
         }
-
+        pool.shutdown();
     }
 }

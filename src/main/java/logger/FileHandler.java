@@ -1,11 +1,28 @@
 package logger;
 
 import java.io.*;
+import java.util.Arrays;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
 public class FileHandler {
+    private static FileHandler INSTANCE = null;
     private final Queue<String> errors = new PriorityQueue<>();
+
+    private FileHandler() {
+
+    }
+
+    public static FileHandler getInstance() {
+        if (INSTANCE == null) {
+            synchronized (FileHandler.class) {
+                if (INSTANCE == null) {
+                    INSTANCE = new FileHandler();
+                }
+            }
+        }
+        return INSTANCE;
+    }
 
     public void addTextInFile(String fileName, String s) {
         File file = new File(fileName);
@@ -64,9 +81,7 @@ public class FileHandler {
     public boolean createFile(File f) {
         if(!f.exists()) {
             try {
-                if (!f.createNewFile()) {
-                    return false;
-                }
+                return f.createNewFile();
             } catch (IOException e) {
                 e.printStackTrace();
                 return false;
@@ -92,5 +107,9 @@ public class FileHandler {
         for (String s : errors) {
             ClientLogger.log(s);
         }
+    }
+
+    public boolean compareFiles(byte[] file1, byte[] file2) {
+        return Arrays.equals(file1, file2);
     }
 }

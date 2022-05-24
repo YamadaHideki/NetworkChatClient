@@ -1,4 +1,4 @@
-package test;
+package multiplyConnect;
 
 import logger.ClientLogger;
 import logger.Settings;
@@ -36,8 +36,6 @@ public class TestClient {
         try {
             System.out.println(1);
             //  Определяем буфер для получения данных
-            //final ByteBuffer inputBuffer = ByteBuffer.allocate(2 << 10);
-
             String msg;
             for (int i = 0; i < 20; i++) {
                 msg = new JSONObject().put("nick", settings.getNick()).put("message", message).toString() + "\n";
@@ -45,10 +43,6 @@ public class TestClient {
                 socketChannel.write(
                         ByteBuffer.wrap(
                                 msg.getBytes(StandardCharsets.UTF_8)));
-
-                /*int bytesCount = socketChannel.read(inputBuffer);
-                System.out.println(new String(inputBuffer.array(), 0, bytesCount, StandardCharsets.UTF_8).trim());
-                inputBuffer.clear();*/
                 Thread.sleep((int) (Math.random() * 1500) + 200);
             }
         } catch (Exception e) {
@@ -57,7 +51,6 @@ public class TestClient {
         } finally {
             System.out.println(3);
             socketChannel.close();
-            //ClientLogger.log("Соединение с сервером закрыто");
         }
 
     }
