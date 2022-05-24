@@ -11,11 +11,13 @@ import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.ArrayDeque;
+import java.util.Queue;
+import java.util.concurrent.*;
 
 public class Client {
     private static final Thread inputThread = new Thread();
+    private static final Queue<String> queMessages = new ConcurrentLinkedQueue<>();
 
     public static void main(Settings settings) throws IOException {
         ExecutorService pool = Executors.newFixedThreadPool(2);
@@ -42,6 +44,8 @@ public class Client {
             var inputBuffer = ByteBuffer.allocate((int) byteBufferSizeFile.getLong());
             socketChannel.read(inputBuffer);
 
+            getMessagesFromServer(pool, socketChannel);
+
             byte[] inputBufferArray = inputBuffer.array();
 
             File messageLogFile = FileHandler.getInstance().readFile(MessageLogger.getLogFileName());
@@ -61,6 +65,9 @@ public class Client {
                     var line = fr.readLine().substring(22);
                     System.out.println(line);
                 }
+
+                printMessages(pool);
+
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
@@ -74,30 +81,11 @@ public class Client {
 
         // Получаем входящий и исходящий потоки информации
         try {
-            pool.submit(() -> {
-                //  Определяем буфер для получения данных
-                final ByteBuffer inputBuffer = ByteBuffer.allocate(2 << 10);
-                while (socketChannel.isConnected()) {
-                    int bytesCount = 0;
-                    try {
-                        bytesCount = socketChannel.read(inputBuffer);
-                        String messageFromServer = new String(inputBuffer.array(), 0, bytesCount, StandardCharsets.UTF_8).trim();
-                        MessageLogger.log(messageFromServer);
-                        System.out.println(messageFromServer);
-                        inputBuffer.clear();
-                    } catch (IOException ignored) { }
-                }
-            });
-
-
-
             String msg;
             while (true) {
                 msg = Main.scanner.nextLine().trim();
                 if (msg.trim().equals("/exit")) break;
-
                 msg = new JSONObject().put("nick", settings.getNick()).put("message", msg).toString() + "\n";
-
                 socketChannel.write(
                         ByteBuffer.wrap(
                                 msg.getBytes(StandardCharsets.UTF_8)));
@@ -107,5 +95,34 @@ public class Client {
             ClientLogger.log("Соединение с сервером закрыто");
         }
         pool.shutdown();
+    }
+
+    public static void printMessages(ExecutorService pool) {
+        pool.submit(() -> {
+            while (true) {
+                String message = queMessages.poll();
+                if (message != null) {
+                    MessageLogger.log(message);
+                    System.out.println(message);
+                }
+                Thread.sleep(200);
+            }
+        });
+    }
+
+    public static void getMessagesFromServer(ExecutorService pool, SocketChannel socketChannel) {
+        pool.submit(() -> {
+            //  Определяем буфер для получения данных
+            final ByteBuffer inputBuffer = ByteBuffer.allocate(2 << 10);
+            while (socketChannel.isConnected()) {
+                int bytesCount = 0;
+                try {
+                    bytesCount = socketChannel.read(inputBuffer);
+                    String messageFromServer = new String(inputBuffer.array(), 0, bytesCount, StandardCharsets.UTF_8).trim();
+                    queMessages.add(messageFromServer);
+                    inputBuffer.clear();
+                } catch (IOException ignored) { }
+            }
+        });
     }
 }
